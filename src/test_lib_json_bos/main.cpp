@@ -19,6 +19,9 @@ int main() {
   // Used for determining int sizes in BOS
   Json::BosTemplate bTemplate;
   bTemplate["id"] = (int)Json::BosDataType::UINT8_T;
+  bTemplate["method"] = (int)Json::BosDataType::STRING_T;
+  bTemplate["params"].append((int)Json::BosDataType::STRING_T);
+  bTemplate["params"].append((int)Json::BosDataType::BYTES_T);
 
   Json::Bos bos;
   debugPrintBos(bos);

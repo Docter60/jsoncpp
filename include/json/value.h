@@ -59,6 +59,11 @@
  */
 namespace Json {
 
+class Bos;
+class BosTemplate;
+
+using BosBuffer = std::vector<unsigned char>;
+
 #if JSON_USE_EXCEPTION
 /** Base class for all exceptions we throw.
  *
@@ -591,6 +596,8 @@ public:
   ptrdiff_t getOffsetStart() const;
   ptrdiff_t getOffsetLimit() const;
 
+  void serialize(Bos& b, const BosTemplate& bTemplate);
+
 private:
   void setType(ValueType v) {
     bits_.value_type_ = static_cast<unsigned char>(v);
@@ -605,6 +612,31 @@ private:
 
   Value& resolveReference(const char* key);
   Value& resolveReference(const char* key, const char* end);
+
+  void serializeNull(BosBuffer& b);
+  
+  void serializeBool(BosBuffer& b, bool v);
+
+  void serializeInt8(BosBuffer& b, char v);
+  void serializeInt16(BosBuffer& b, short v);
+  void serializeInt32(BosBuffer& b, int v);
+  // void serializeInt64(Bos& b, long long v); // Not implemented
+  
+  void serializeUInt8(BosBuffer& b, unsigned char v);
+  void serializeUInt16(BosBuffer& b, unsigned short v);
+  void serializeUInt32(BosBuffer& b, unsigned int v);
+  // void serializeUInt64(Bos& b, unsigned long long v); // Not implemented
+  
+  void serializeFloat(BosBuffer& b, float v);
+  void serializeDouble(BosBuffer& b, double v);
+
+  void serializeString(BosBuffer& b, const std::string& s);
+  void serializeBytes(BosBuffer& b, const void* bytes, unsigned int length);
+  void serializeArray(BosBuffer& b, const Value& v,
+                      const BosTemplate& bTemplate);
+  void serializeObject(BosBuffer& b, const Value& v,
+                       const BosTemplate& bTemplate);
+  void serializeUVarInt(BosBuffer& b, unsigned int i);
 
   // struct MemberNamesTransform
   //{

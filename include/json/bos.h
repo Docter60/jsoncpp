@@ -25,7 +25,11 @@ enum class JSON_API BosDataType {
 
 class JSON_API BosTemplate : public Value {};
 
+using BosBuffer = std::vector<unsigned char>;
+
 class JSON_API Bos {
+  friend class Value;
+
 public:
   Bos();
 
@@ -33,6 +37,6 @@ public:
   size_t lengthInBytes() const;
 
 private:
-  std::vector<unsigned char> bytes;
+  BosBuffer buf;
 };
 } // namespace Json

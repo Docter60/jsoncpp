@@ -5,6 +5,7 @@
 
 #if !defined(JSON_IS_AMALGAMATION)
 #include <json/assertions.h>
+#include <json/bos.h>
 #include <json/value.h>
 #include <json/writer.h>
 #endif // if !defined(JSON_IS_AMALGAMATION)
@@ -1072,6 +1073,43 @@ Value& Value::resolveReference(char const* key, char const* end) {
   return value;
 }
 
+void Value::serializeObject(BosBuffer& b, const Value& v,
+                     const BosTemplate& bTemplate) {
+  // Append object type identifier
+  b.emplace_back(u8'\x0F');
+  // Append key count
+  serializeUVarInt(b, size());
+  // Iterate through each key value pair
+  for (const auto& e : *(this->value_.map_)) {
+    const CZString& name = e.first;
+    unsigned int length = name.length();
+    const char* nameData = name.data();
+
+    // Append key name length
+    serializeUVarInt(b, length);
+    // Append each name char
+    for (int i = 0; i < length; ++i) {
+      b.emplace_back(nameData[i]);
+    }
+  }
+}
+
+void Value::serializeUVarInt(BosBuffer& b, unsigned int i) {
+  if (i < 0xFD) {
+    b.emplace_back(i);
+  } else if (i < 0xFFFF) {
+    b.emplace_back(u8'\xFD');
+    b.emplace_back(i & 0xFF);
+    b.emplace_back((i & 0xFF00) >> 8);
+  } else {
+    b.emplace_back(u8'\xFE');
+    b.emplace_back(i & 0xFF);
+    b.emplace_back((i & 0xFF00) >> 8);
+    b.emplace_back((i & 0xFF0000) >> 16);
+    b.emplace_back((i & 0xFF000000) >> 24);
+  }
+}
+
 Value Value::get(ArrayIndex index, const Value& defaultValue) const {
   const Value* value = &((*this)[index]);
   return value == &nullSingleton() ? defaultValue : *value;
@@ -1434,6 +1472,13 @@ void Value::setOffsetLimit(ptrdiff_t limit) { limit_ = limit; }
 ptrdiff_t Value::getOffsetStart() const { return start_; }
 
 ptrdiff_t Value::getOffsetLimit() const { return limit_; }
+
+void Value::serialize(Bos& b, const BosTemplate& bTemplate) {
+  if (type() != ValueType::objectValue)
+    return;
+  b = Bos();
+  serializeObject(b.buf, *this, bTemplate);
+}
 
 String Value::toStyledString() const {
   StreamWriterBuilder builder;
