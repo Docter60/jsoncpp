@@ -38,6 +38,7 @@ endif()
 set(JSONCPP_INCLUDE_DIR ../../include)
 
 set(PUBLIC_HEADERS
+    ${JSONCPP_INCLUDE_DIR}/json/bos.h
     ${JSONCPP_INCLUDE_DIR}/json/config.h
     ${JSONCPP_INCLUDE_DIR}/json/forwards.h
     ${JSONCPP_INCLUDE_DIR}/json/json_features.h
@@ -51,6 +52,7 @@ set(PUBLIC_HEADERS
 source_group("Public API" FILES ${PUBLIC_HEADERS})
 
 set(JSONCPP_SOURCES
+    json_bos.cpp
     json_tool.h
     json_reader.cpp
     json_valueiterator.inl

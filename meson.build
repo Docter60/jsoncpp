@@ -21,6 +21,7 @@ project(
 jsoncpp_headers = files([
   'include/json/allocator.h',
   'include/json/assertions.h',
+  'include/json/bos.h',
   'include/json/config.h',
   'include/json/json_features.h',
   'include/json/forwards.h',
@@ -46,6 +47,7 @@ endif
 
 jsoncpp_lib = library(
   'jsoncpp', files([
+    'src/lib_json/json_bos.cpp',
     'src/lib_json/json_reader.cpp',
     'src/lib_json/json_value.cpp',
     'src/lib_json/json_writer.cpp',
@@ -117,3 +119,12 @@ test(
     join_paths(meson.current_source_dir(), 'test/data')],
     workdir : join_paths(meson.current_source_dir(), 'test/data'),
   )
+
+jsoncpp_bos_test = executable(
+  'jsoncpp_bos_test', files([
+    'src/test_lib_json_bos/main.cpp',
+  ]),
+  include_directories : jsoncpp_include_directories,
+  link_with : jsoncpp_lib,
+  install : false,
+  cpp_args: dll_import_flag)
