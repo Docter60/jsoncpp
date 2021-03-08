@@ -1073,40 +1073,283 @@ Value& Value::resolveReference(char const* key, char const* end) {
   return value;
 }
 
-void Value::serializeObject(BosBuffer& b, const Value& v,
-                     const BosTemplate& bTemplate) {
-  // Append object type identifier
-  b.emplace_back(u8'\x0F');
-  // Append key count
-  serializeUVarInt(b, size());
-  // Iterate through each key value pair
-  for (const auto& e : *(this->value_.map_)) {
-    const CZString& name = e.first;
-    unsigned int length = name.length();
-    const char* nameData = name.data();
+void Value::serializeNull(Bos& b) { b.append(BosDataType::NULL_T); }
 
-    // Append key name length
-    serializeUVarInt(b, length);
-    // Append each name char
-    for (int i = 0; i < length; ++i) {
-      b.emplace_back(nameData[i]);
+void Value::serializeBool(Bos& b, bool v) {
+  b.append(BosDataType::BOOL_T);
+  b.append(v);
+}
+
+void Value::serializeInt8(Bos& b, char v) {
+  b.append(BosDataType::INT8_T);
+  b.append(v);
+}
+
+void Value::serializeInt16(Bos& b, short v) {
+  b.append(BosDataType::INT16_T);
+  b.append(v & 0xFF);
+  b.append((v & 0xFF00) >> 8);
+}
+
+void Value::serializeInt32(Bos& b, int v) {
+  b.append(BosDataType::INT32_T);
+  b.append(v & 0xFF);
+  b.append((v & 0xFF00) >> 8);
+  b.append((v & 0xFF0000) >> 16);
+  b.append((v & 0xFF000000) >> 24);
+}
+
+void Value::serializeUInt8(Bos& b, unsigned char v) {
+  b.append(BosDataType::UINT8_T);
+  b.append(v);
+}
+
+void Value::serializeUInt16(Bos& b, unsigned short v) {
+  b.append(BosDataType::UINT16_T);
+  b.append(v & 0xFF);
+  b.append((v & 0xFF00) >> 8);
+}
+
+void Value::serializeUInt32(Bos& b, unsigned int v) {
+  b.append(BosDataType::UINT32_T);
+  b.append(v & 0xFF);
+  b.append((v & 0xFF00) >> 8);
+  b.append((v & 0xFF0000) >> 16);
+  b.append((v & 0xFF000000) >> 24);
+}
+
+void Value::serializeFloat(Bos& b, float v) {
+  b.append(BosDataType::FLOAT_T);
+  uint32_t i;
+  memcpy(&i, &v, sizeof(uint32_t));
+  b.append(i & 0xFF);
+  b.append((i & 0xFF00) >> 8);
+  b.append((i & 0xFF0000) >> 16);
+  b.append((i & 0xFF000000) >> 24);
+}
+
+void Value::serializeDouble(Bos& b, double v) {
+  b.append(BosDataType::DOUBLE_T);
+  uint64_t i;
+  memcpy(&i, &v, sizeof(uint64_t));
+  b.append(i & 0xFF);
+  b.append((i & 0xFF00) >> 8);
+  b.append((i & 0xFF0000) >> 16);
+  b.append((i & 0xFF000000) >> 24);
+  b.append((i & 0xFF00000000) >> 32);
+  b.append((i & 0xFF0000000000) >> 40);
+  b.append((i & 0xFF000000000000) >> 48);
+  b.append((i & 0xFF00000000000000) >> 56);
+}
+
+void Value::serializeString(Bos& b, const std::string& s) {
+  b.append(BosDataType::STRING_T);
+  unsigned int l = s.length();
+  serializeUVarInt(b, l);
+  for (unsigned int i = 0; i < l; ++i) {
+    b.append(s[i]);
+  }
+}
+
+void Value::serializeBytes(Bos& b, const void* bytes,
+                           unsigned int length) {
+  b.append(BosDataType::BYTES_T);
+  const char* c = (const char*)bytes;
+  serializeUVarInt(b, length);
+  for (unsigned int i = 0; i < length; ++i) {
+    b.append(c[i]);
+  }
+}
+
+void Value::serializeArray(Bos& b, const Value& v,
+                           const Value& bTemplate) {
+  b.append(BosDataType::ARRAY_T);
+  serializeUVarInt(b, v.size());
+  const ObjectValues& vmap = *(v.value_.map_);
+  const ObjectValues& btemplatemap = *(bTemplate.value_.map_);
+  ObjectValues::const_iterator& vIt = vmap.begin();
+  ObjectValues::const_iterator& tIt = btemplatemap.begin();
+  ObjectValues::const_iterator& vIte = vmap.end();
+  ObjectValues::const_iterator& tIte = btemplatemap.end();
+  for (vIt, tIt;
+       vIt != vIte && tIt != tIte; ++vIt, ++tIt) {
+    const Value& av = vIt->second;
+    switch (av.type()) {
+    case ValueType::nullValue:
+      serializeNull(b);
+      break;
+    case ValueType::booleanValue:
+      serializeBool(b, av.asBool());
+      break;
+    case ValueType::intValue: {
+      BosDataType bdt = (BosDataType)tIt->second.asInt();
+      switch (bdt) {
+      case BosDataType::INT8_T:
+        serializeInt8(b, av.asInt());
+        break;
+      case BosDataType::INT16_T:
+        serializeInt16(b, av.asInt());
+        break;
+      case BosDataType::INT32_T:
+        serializeInt32(b, av.asInt());
+        break;
+      default:
+        break;
+      }
+    }
+      break;
+    case ValueType::uintValue: {
+      BosDataType bdt = (BosDataType)tIt->second.asInt();
+      switch (bdt) {
+      case BosDataType::UINT8_T:
+        serializeUInt8(b, av.asUInt());
+        break;
+      case BosDataType::UINT16_T:
+        serializeUInt16(b, av.asUInt());
+        break;
+      case BosDataType::UINT32_T:
+        serializeUInt32(b, av.asUInt());
+        break;
+      default:
+        break;
+      }
+    }
+      break;
+    case ValueType::realValue: {
+      BosDataType bdt = (BosDataType)tIt->second.asInt();
+      switch (bdt) {
+      case BosDataType::FLOAT_T:
+        serializeFloat(b, av.asFloat());
+        break;
+      case BosDataType::DOUBLE_T:
+        serializeDouble(b, av.asDouble());
+      default:
+        break;
+      }
+    }
+      break;
+    case ValueType::stringValue:
+      if (tIt->second.isNull()) {
+        serializeString(b, av.asString());
+      } else if (tIt->second.asInt() == (int)BosDataType::STRING_T) {
+        serializeString(b, av.asString());
+      } else if (tIt->second.asInt() == (int)BosDataType::BYTES_T) {
+        serializeBytes(b, av.asCString(), sizeof(av.asCString()));
+      }
+      break;
+    case ValueType::arrayValue:
+      serializeArray(b, av, tIt->second);
+      break;
+    case ValueType::objectValue:
+      serializeObject(b, av, tIt->second);
+      break;
+    default:
+      break;
     }
   }
 }
 
-void Value::serializeUVarInt(BosBuffer& b, unsigned int i) {
+void Value::serializeObject(Bos& b, const Value& v,
+                            const Value& bTemplate) {
+  b.append(BosDataType::OBJ_T);
+  serializeUVarInt(b, v.size());
+  for (const auto& e : *(v.value_.map_)) {
+    const CZString& name = e.first;
+    unsigned int length = name.length();
+    const char* nameData = name.data();
+    serializeUVarInt(b, length);
+    for (int i = 0; i < length; ++i) {
+      b.append(nameData[i]);
+    }
+    const Value& ev = e.second;
+    switch (ev.type()) {
+    case ValueType::nullValue:
+      serializeNull(b);
+      break;
+    case ValueType::booleanValue:
+      serializeBool(b, ev.asBool());
+      break;
+    case ValueType::intValue: {
+      BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
+      switch (bdt) {
+      case BosDataType::INT8_T:
+        serializeInt8(b, ev.asInt());
+        break;
+      case BosDataType::INT16_T:
+        serializeInt16(b, ev.asInt());
+        break;
+      case BosDataType::INT32_T:
+        serializeInt32(b, ev.asInt());
+        break;
+      default:
+        break;
+      }
+    }
+      break;
+    case ValueType::uintValue: {
+      BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
+      switch (bdt) {
+      case BosDataType::UINT8_T:
+        serializeUInt8(b, ev.asUInt());
+        break;
+      case BosDataType::UINT16_T:
+        serializeUInt16(b, ev.asUInt());
+        break;
+      case BosDataType::UINT32_T:
+        serializeUInt32(b, ev.asUInt());
+        break;
+      default:
+        break;
+      }
+    }
+      break;
+    case ValueType::realValue: {
+      BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
+      switch (bdt) {
+      case BosDataType::FLOAT_T:
+        serializeFloat(b, ev.asFloat());
+        break;
+      case BosDataType::DOUBLE_T:
+        serializeDouble(b, ev.asDouble());
+      default:
+        break;
+      }
+    }
+      break;
+    case ValueType::stringValue:
+      if (bTemplate[nameData].isNull()) {
+        serializeString(b, ev.asString());
+      } else if (bTemplate[nameData].asInt() == (int)BosDataType::STRING_T) {
+        serializeString(b, ev.asString());
+      } else if (bTemplate[nameData].asInt() == (int)BosDataType::BYTES_T) {
+        serializeBytes(b, ev.asCString(), sizeof(ev.asCString()));
+      }
+      break;
+    case ValueType::arrayValue:
+      serializeArray(b, ev, bTemplate[nameData]);
+      break;
+    case ValueType::objectValue:
+      serializeObject(b, ev, bTemplate[nameData]);
+      break;
+    default:
+      break;
+    }
+  }
+}
+
+void Value::serializeUVarInt(Bos& b, unsigned int i) {
   if (i < 0xFD) {
-    b.emplace_back(i);
+    b.append(i);
   } else if (i < 0xFFFF) {
-    b.emplace_back(u8'\xFD');
-    b.emplace_back(i & 0xFF);
-    b.emplace_back((i & 0xFF00) >> 8);
+    b.append(0xFD);
+    b.append(i & 0xFF);
+    b.append((i & 0xFF00) >> 8);
   } else {
-    b.emplace_back(u8'\xFE');
-    b.emplace_back(i & 0xFF);
-    b.emplace_back((i & 0xFF00) >> 8);
-    b.emplace_back((i & 0xFF0000) >> 16);
-    b.emplace_back((i & 0xFF000000) >> 24);
+    b.append(0xFE);
+    b.append(i & 0xFF);
+    b.append((i & 0xFF00) >> 8);
+    b.append((i & 0xFF0000) >> 16);
+    b.append((i & 0xFF000000) >> 24);
   }
 }
 
@@ -1473,11 +1716,11 @@ ptrdiff_t Value::getOffsetStart() const { return start_; }
 
 ptrdiff_t Value::getOffsetLimit() const { return limit_; }
 
-void Value::serialize(Bos& b, const BosTemplate& bTemplate) {
+void Value::serialize(Bos& b, const Value& bTemplate) {
   if (type() != ValueType::objectValue)
     return;
   b = Bos();
-  serializeObject(b.buf, *this, bTemplate);
+  serializeObject(b, *this, bTemplate);
 }
 
 String Value::toStyledString() const {

@@ -38,6 +38,9 @@ class ValueIteratorBase;
 class ValueIterator;
 class ValueConstIterator;
 
+// bos.h
+class Bos;
+
 } // namespace Json
 
 #endif // JSON_FORWARDS_H_INCLUDED

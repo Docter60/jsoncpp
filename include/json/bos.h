@@ -1,7 +1,6 @@
 #pragma once
 
-#include <json/value.h>
-#include <vector>
+#include "forwards.h"
 
 namespace Json {
 enum class JSON_API BosDataType {
@@ -23,20 +22,32 @@ enum class JSON_API BosDataType {
   OBJ_T = 0x0F
 };
 
-class JSON_API BosTemplate : public Value {};
-
-using BosBuffer = std::vector<unsigned char>;
-
 class JSON_API Bos {
   friend class Value;
 
 public:
   Bos();
+  Bos(const Bos& other);
+  virtual ~Bos();
+
+  Bos& operator=(const Bos& other);
 
   const void* data() const;
-  size_t lengthInBytes() const;
+  uint32_t lengthInBytes() const;
+
+  void append(BosDataType type);
+  void append(unsigned char uc);
+  void append(const void* v, unsigned int size);
+
+  void clear();
 
 private:
-  BosBuffer buf;
+  void setLengthBytes();
+  void resize();
+  void resizeToFit(uint32_t additionalBytes);
+
+  unsigned char* bytes;
+  uint32_t length; // maybe remove this field because of redundancy
+  uint32_t capacity;
 };
 } // namespace Json
