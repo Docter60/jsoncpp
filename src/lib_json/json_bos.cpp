@@ -59,8 +59,8 @@ void Bos::append(unsigned char uc) {
 void Bos::append(const void* v, unsigned int size) {
   if ((length + size) > capacity)
     resizeToFit(size);
+  memcpy(&bytes[length], v, size);
   length += size;
-  memcpy(bytes, v, size);
   setLengthBytes();
 }
 
@@ -68,6 +68,8 @@ void Bos::clear() {
   length = 4;
   setLengthBytes();
 }
+
+void Bos::deserialize(Value& root, const Value& bTemplate) {}
 
 void Bos::setLengthBytes() { memcpy(bytes, &length, sizeof(uint32_t)); }
 

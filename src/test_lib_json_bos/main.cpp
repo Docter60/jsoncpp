@@ -6,7 +6,7 @@
 static void debugPrintBos(const Json::Bos& b) {
   unsigned char* uc = (unsigned char*)b.data();
   uint32_t size = b.lengthInBytes();
-  printf("BOS size in bytes: %u", size);
+  printf("BOS size in bytes: %u\nBOS data: ", size);
   for (uint32_t i = 0; i < size; ++i) {
     printf(" 0x%02X", uc[i]);
   }

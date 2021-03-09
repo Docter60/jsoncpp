@@ -1087,16 +1087,14 @@ void Value::serializeInt8(Bos& b, char v) {
 
 void Value::serializeInt16(Bos& b, short v) {
   b.append(BosDataType::INT16_T);
-  b.append(v & 0xFF);
-  b.append((v & 0xFF00) >> 8);
+  void* uc = static_cast<void*>(&v);
+  b.append(uc, sizeof(int16_t));
 }
 
 void Value::serializeInt32(Bos& b, int v) {
   b.append(BosDataType::INT32_T);
-  b.append(v & 0xFF);
-  b.append((v & 0xFF00) >> 8);
-  b.append((v & 0xFF0000) >> 16);
-  b.append((v & 0xFF000000) >> 24);
+  void* uc = static_cast<void*>(&v);
+  b.append(uc, sizeof(int32_t));
 }
 
 void Value::serializeUInt8(Bos& b, unsigned char v) {
@@ -1106,47 +1104,33 @@ void Value::serializeUInt8(Bos& b, unsigned char v) {
 
 void Value::serializeUInt16(Bos& b, unsigned short v) {
   b.append(BosDataType::UINT16_T);
-  b.append(v & 0xFF);
-  b.append((v & 0xFF00) >> 8);
+  void* uc = static_cast<void*>(&v);
+  b.append(uc, sizeof(uint16_t));
 }
 
 void Value::serializeUInt32(Bos& b, unsigned int v) {
   b.append(BosDataType::UINT32_T);
-  b.append(v & 0xFF);
-  b.append((v & 0xFF00) >> 8);
-  b.append((v & 0xFF0000) >> 16);
-  b.append((v & 0xFF000000) >> 24);
+  void* uc = static_cast<void*>(&v);
+  b.append(uc, sizeof(uint32_t));
 }
 
 void Value::serializeFloat(Bos& b, float v) {
   b.append(BosDataType::FLOAT_T);
-  uint32_t i;
-  memcpy(&i, &v, sizeof(uint32_t));
-  b.append(i & 0xFF);
-  b.append((i & 0xFF00) >> 8);
-  b.append((i & 0xFF0000) >> 16);
-  b.append((i & 0xFF000000) >> 24);
+  void* uc = static_cast<void*>(&v);
+  b.append(uc, sizeof(float));
 }
 
 void Value::serializeDouble(Bos& b, double v) {
   b.append(BosDataType::DOUBLE_T);
-  uint64_t i;
-  memcpy(&i, &v, sizeof(uint64_t));
-  b.append(i & 0xFF);
-  b.append((i & 0xFF00) >> 8);
-  b.append((i & 0xFF0000) >> 16);
-  b.append((i & 0xFF000000) >> 24);
-  b.append((i & 0xFF00000000) >> 32);
-  b.append((i & 0xFF0000000000) >> 40);
-  b.append((i & 0xFF000000000000) >> 48);
-  b.append((i & 0xFF00000000000000) >> 56);
+  void* uc = static_cast<void*>(&v);
+  b.append(uc, sizeof(double));
 }
 
 void Value::serializeString(Bos& b, const std::string& s) {
   b.append(BosDataType::STRING_T);
-  unsigned int l = s.length();
+  size_t l = s.length();
   serializeUVarInt(b, l);
-  for (unsigned int i = 0; i < l; ++i) {
+  for (size_t i = 0; i < l; ++i) {
     b.append(s[i]);
   }
 }
@@ -1167,10 +1151,10 @@ void Value::serializeArray(Bos& b, const Value& v,
   serializeUVarInt(b, v.size());
   const ObjectValues& vmap = *(v.value_.map_);
   const ObjectValues& btemplatemap = *(bTemplate.value_.map_);
-  ObjectValues::const_iterator& vIt = vmap.begin();
-  ObjectValues::const_iterator& tIt = btemplatemap.begin();
-  ObjectValues::const_iterator& vIte = vmap.end();
-  ObjectValues::const_iterator& tIte = btemplatemap.end();
+  ObjectValues::const_iterator vIt = vmap.begin();
+  ObjectValues::const_iterator tIt = btemplatemap.begin();
+  ObjectValues::const_iterator vIte = vmap.end();
+  ObjectValues::const_iterator tIte = btemplatemap.end();
   for (vIt, tIt;
        vIt != vIte && tIt != tIte; ++vIt, ++tIt) {
     const Value& av = vIt->second;
@@ -1183,38 +1167,40 @@ void Value::serializeArray(Bos& b, const Value& v,
       break;
     case ValueType::intValue: {
       BosDataType bdt = (BosDataType)tIt->second.asInt();
+      int32_t i = av.asInt();
+      const void* vh = &i;
       switch (bdt) {
       case BosDataType::INT8_T:
-        serializeInt8(b, av.asInt());
+        b.append(vh, sizeof(int8_t));
         break;
       case BosDataType::INT16_T:
-        serializeInt16(b, av.asInt());
+        b.append(vh, sizeof(int16_t));
         break;
       case BosDataType::INT32_T:
-        serializeInt32(b, av.asInt());
+        b.append(vh, sizeof(int32_t));
         break;
       default:
         break;
       }
-    }
-      break;
+    } break;
     case ValueType::uintValue: {
       BosDataType bdt = (BosDataType)tIt->second.asInt();
+      uint32_t ui = av.asUInt();
+      const void* vh = &ui;
       switch (bdt) {
       case BosDataType::UINT8_T:
-        serializeUInt8(b, av.asUInt());
+        b.append(vh, sizeof(uint8_t));
         break;
       case BosDataType::UINT16_T:
-        serializeUInt16(b, av.asUInt());
+        b.append(vh, sizeof(uint16_t));
         break;
       case BosDataType::UINT32_T:
-        serializeUInt32(b, av.asUInt());
+        b.append(vh, sizeof(uint32_t));
         break;
       default:
         break;
       }
-    }
-      break;
+    } break;
     case ValueType::realValue: {
       BosDataType bdt = (BosDataType)tIt->second.asInt();
       switch (bdt) {
@@ -1258,28 +1244,30 @@ void Value::serializeObject(Bos& b, const Value& v,
     unsigned int length = name.length();
     const char* nameData = name.data();
     serializeUVarInt(b, length);
-    for (int i = 0; i < length; ++i) {
+    for (unsigned int i = 0; i < length; ++i) {
       b.append(nameData[i]);
     }
     const Value& ev = e.second;
     switch (ev.type()) {
     case ValueType::nullValue:
-      serializeNull(b);
+      b.append(0);
       break;
     case ValueType::booleanValue:
-      serializeBool(b, ev.asBool());
+      b.append(ev.asBool());
       break;
     case ValueType::intValue: {
       BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
+      int32_t i = ev.asInt();
+      const void* vh = &i;
       switch (bdt) {
       case BosDataType::INT8_T:
-        serializeInt8(b, ev.asInt());
+        b.append(vh, sizeof(int8_t));
         break;
       case BosDataType::INT16_T:
-        serializeInt16(b, ev.asInt());
+        b.append(vh, sizeof(int16_t));
         break;
       case BosDataType::INT32_T:
-        serializeInt32(b, ev.asInt());
+        b.append(vh, sizeof(int32_t));
         break;
       default:
         break;
@@ -1288,15 +1276,17 @@ void Value::serializeObject(Bos& b, const Value& v,
       break;
     case ValueType::uintValue: {
       BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
+      uint32_t ui = ev.asUInt();
+      const void* vh = &ui;
       switch (bdt) {
       case BosDataType::UINT8_T:
-        serializeUInt8(b, ev.asUInt());
+        b.append(vh, sizeof(uint8_t));
         break;
       case BosDataType::UINT16_T:
-        serializeUInt16(b, ev.asUInt());
+        b.append(vh, sizeof(uint16_t));
         break;
       case BosDataType::UINT32_T:
-        serializeUInt32(b, ev.asUInt());
+        b.append(vh, sizeof(uint32_t));
         break;
       default:
         break;
@@ -1337,19 +1327,19 @@ void Value::serializeObject(Bos& b, const Value& v,
   }
 }
 
-void Value::serializeUVarInt(Bos& b, unsigned int i) {
-  if (i < 0xFD) {
-    b.append(i);
-  } else if (i < 0xFFFF) {
+void Value::serializeUVarInt(Bos& b, size_t i) {
+  const void* uc = &i;
+  if (i < 0xFDu) {
+    b.append(uc, sizeof(uint8_t));
+  } else if (i <= 0xFFFFu) {
     b.append(0xFD);
-    b.append(i & 0xFF);
-    b.append((i & 0xFF00) >> 8);
-  } else {
+    b.append(uc, sizeof(uint16_t));
+  } else if (i <= 0xFFFFFFFFu) {
     b.append(0xFE);
-    b.append(i & 0xFF);
-    b.append((i & 0xFF00) >> 8);
-    b.append((i & 0xFF0000) >> 16);
-    b.append((i & 0xFF000000) >> 24);
+    b.append(uc, sizeof(uint32_t));
+  } else {
+    b.append(0xFF);
+    b.append(uc, sizeof(uint64_t));
   }
 }
 
@@ -1719,7 +1709,7 @@ ptrdiff_t Value::getOffsetLimit() const { return limit_; }
 void Value::serialize(Bos& b, const Value& bTemplate) {
   if (type() != ValueType::objectValue)
     return;
-  b = Bos();
+  b.clear();
   serializeObject(b, *this, bTemplate);
 }
 

@@ -629,7 +629,7 @@ private:
   void serializeBytes(Bos& b, const void* bytes, unsigned int length);
   void serializeArray(Bos& b, const Value& v, const Value& bTemplate);
   void serializeObject(Bos& b, const Value& v, const Value& bTemplate);
-  void serializeUVarInt(Bos& b, unsigned int i);
+  void serializeUVarInt(Bos& b, size_t i);
 
   // struct MemberNamesTransform
   //{

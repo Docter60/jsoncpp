@@ -41,6 +41,8 @@ public:
 
   void clear();
 
+  void deserialize(Value& root, const Value& bTemplate);
+
 private:
   void setLengthBytes();
   void resize();
