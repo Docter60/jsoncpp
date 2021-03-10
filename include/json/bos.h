@@ -27,6 +27,7 @@ class JSON_API Bos {
 
 public:
   Bos();
+  Bos(const void* data);
   Bos(const Bos& other);
   virtual ~Bos();
 
@@ -41,9 +42,14 @@ public:
 
   void clear();
 
-  void deserialize(Value& root, const Value& bTemplate);
+  void deserialize(Value& root);
 
 private:
+  void deserializeArray(Value& root, unsigned int& i);
+  void deserializeObject(Value& root, unsigned int& i);
+  unsigned int deserializeUVarInt(unsigned int& i);
+  std::string deserializeRawString(unsigned int& i);
+  Value deserializeElement(unsigned int& i);
   void setLengthBytes();
   void resize();
   void resizeToFit(uint32_t additionalBytes);

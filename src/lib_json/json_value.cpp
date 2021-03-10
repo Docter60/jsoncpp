@@ -1167,6 +1167,7 @@ void Value::serializeArray(Bos& b, const Value& v,
       break;
     case ValueType::intValue: {
       BosDataType bdt = (BosDataType)tIt->second.asInt();
+      b.append(&bdt, sizeof(unsigned char));
       int32_t i = av.asInt();
       const void* vh = &i;
       switch (bdt) {
@@ -1185,6 +1186,7 @@ void Value::serializeArray(Bos& b, const Value& v,
     } break;
     case ValueType::uintValue: {
       BosDataType bdt = (BosDataType)tIt->second.asInt();
+      b.append(&bdt, sizeof(unsigned char));
       uint32_t ui = av.asUInt();
       const void* vh = &ui;
       switch (bdt) {
@@ -1203,6 +1205,7 @@ void Value::serializeArray(Bos& b, const Value& v,
     } break;
     case ValueType::realValue: {
       BosDataType bdt = (BosDataType)tIt->second.asInt();
+      b.append(&bdt, sizeof(unsigned char));
       switch (bdt) {
       case BosDataType::FLOAT_T:
         serializeFloat(b, av.asFloat());
@@ -1257,6 +1260,7 @@ void Value::serializeObject(Bos& b, const Value& v,
       break;
     case ValueType::intValue: {
       BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
+      b.append(&bdt, sizeof(unsigned char));
       int32_t i = ev.asInt();
       const void* vh = &i;
       switch (bdt) {
@@ -1276,6 +1280,7 @@ void Value::serializeObject(Bos& b, const Value& v,
       break;
     case ValueType::uintValue: {
       BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
+      b.append(&bdt, sizeof(unsigned char));
       uint32_t ui = ev.asUInt();
       const void* vh = &ui;
       switch (bdt) {
@@ -1295,6 +1300,7 @@ void Value::serializeObject(Bos& b, const Value& v,
       break;
     case ValueType::realValue: {
       BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
+      b.append(&bdt, sizeof(unsigned char));
       switch (bdt) {
       case BosDataType::FLOAT_T:
         serializeFloat(b, ev.asFloat());

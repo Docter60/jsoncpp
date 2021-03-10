@@ -31,5 +31,13 @@ int main() {
   value.serialize(bos, bTemplate);
   debugPrintBos(bos);
 
+  Json::Value v;
+  bos.deserialize(v);
+
+  Json::StreamWriterBuilder swb;
+  swb["indentation"] = "    ";
+  std::string document = Json::writeString(swb, v);
+  std::cout << "Deserialized BOS: " << std::endl << document << std::endl;
+
   return 0;
 }
