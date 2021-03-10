@@ -1115,13 +1115,13 @@ void Value::serializeUInt32(Bos& b, unsigned int v) {
 }
 
 void Value::serializeFloat(Bos& b, float v) {
-  b.append(BosDataType::FLOAT_T);
+  //b.append(BosDataType::FLOAT_T);
   void* uc = static_cast<void*>(&v);
   b.append(uc, sizeof(float));
 }
 
 void Value::serializeDouble(Bos& b, double v) {
-  b.append(BosDataType::DOUBLE_T);
+  //b.append(BosDataType::DOUBLE_T);
   void* uc = static_cast<void*>(&v);
   b.append(uc, sizeof(double));
 }
@@ -1160,10 +1160,11 @@ void Value::serializeArray(Bos& b, const Value& v,
     const Value& av = vIt->second;
     switch (av.type()) {
     case ValueType::nullValue:
-      serializeNull(b);
+      b.append(BosDataType::NULL_T);
       break;
     case ValueType::booleanValue:
-      serializeBool(b, av.asBool());
+      b.append(BosDataType::BOOL_T);
+      b.append(av.asBool());
       break;
     case ValueType::intValue: {
       BosDataType bdt = (BosDataType)tIt->second.asInt();
@@ -1179,6 +1180,9 @@ void Value::serializeArray(Bos& b, const Value& v,
         break;
       case BosDataType::INT32_T:
         b.append(vh, sizeof(int32_t));
+        break;
+      case BosDataType::INT64_T:
+        b.append(vh, sizeof(int64_t));
         break;
       default:
         break;
@@ -1198,6 +1202,9 @@ void Value::serializeArray(Bos& b, const Value& v,
         break;
       case BosDataType::UINT32_T:
         b.append(vh, sizeof(uint32_t));
+        break;
+      case BosDataType::UINT64_T:
+        b.append(vh, sizeof(uint64_t));
         break;
       default:
         break;
@@ -1253,9 +1260,10 @@ void Value::serializeObject(Bos& b, const Value& v,
     const Value& ev = e.second;
     switch (ev.type()) {
     case ValueType::nullValue:
-      b.append(0);
+      b.append(BosDataType::NULL_T);
       break;
     case ValueType::booleanValue:
+      b.append(BosDataType::BOOL_T);
       b.append(ev.asBool());
       break;
     case ValueType::intValue: {
@@ -1272,6 +1280,9 @@ void Value::serializeObject(Bos& b, const Value& v,
         break;
       case BosDataType::INT32_T:
         b.append(vh, sizeof(int32_t));
+        break;
+      case BosDataType::INT64_T:
+        b.append(vh, sizeof(int64_t));
         break;
       default:
         break;
@@ -1292,6 +1303,9 @@ void Value::serializeObject(Bos& b, const Value& v,
         break;
       case BosDataType::UINT32_T:
         b.append(vh, sizeof(uint32_t));
+        break;
+      case BosDataType::UINT64_T:
+        b.append(vh, sizeof(uint64_t));
         break;
       default:
         break;

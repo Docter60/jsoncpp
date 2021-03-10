@@ -98,6 +98,7 @@ void Bos::deserializeObject(Value& root, unsigned int& i) {
   unsigned int count = deserializeUVarInt(i);
   for (unsigned int j = 0; j < count; ++j) {
     std::string keyName = deserializeRawString(i);
+    printf("Object key: %s\n", keyName.data());
     root[keyName] = deserializeElement(i);
   }
 }
@@ -131,6 +132,8 @@ std::string Bos::deserializeRawString(unsigned int& i) {
 
 Value Bos::deserializeElement(unsigned int& i) {
   BosDataType t = (BosDataType)bytes[i];
+  printf("Position: %u    ", i);
+  printf("0x%02x\n", bytes[i]);
   ++i;
   int temp = i;
   switch (t) {
@@ -172,7 +175,7 @@ Value Bos::deserializeElement(unsigned int& i) {
   case BosDataType::STRING_T:
     return Value(deserializeRawString(i));
   case BosDataType::BYTES_T:
-    return Value(deserializeRawString(i)); // might not work correctly
+    return Value(deserializeRawString(i));
   case BosDataType::ARRAY_T: {
     Value v;
     deserializeArray(v, i);
