@@ -47,7 +47,7 @@ public:
 private:
   void deserializeArray(Value& root, unsigned int& i);
   void deserializeObject(Value& root, unsigned int& i);
-  unsigned int deserializeUVarInt(unsigned int& i);
+  size_t deserializeUVarInt(unsigned int& i);
   std::string deserializeRawString(unsigned int& i);
   Value deserializeElement(unsigned int& i);
   void setLengthBytes();

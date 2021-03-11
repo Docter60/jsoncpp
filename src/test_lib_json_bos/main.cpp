@@ -22,11 +22,11 @@ int main() {
   value["int8"] = 8;
   value["int16"] = 16;
   value["int32"] = 32;
-  value["int64"] = 64;
+  value["int64"] = 64ll;
   value["uint8"] = 9u;
   value["uint16"] = 17u;
   value["uint32"] = 33u;
-  value["uint64"] = 65u;
+  value["uint64"] = 65ull;
   value["float"] = M_PI;
   value["double"] = 2.0 * M_PI;
   value["string"] = "Hello BOS!";

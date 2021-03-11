@@ -608,23 +608,6 @@ private:
   Value& resolveReference(const char* key);
   Value& resolveReference(const char* key, const char* end);
 
-  void serializeNull(Bos& b);
-  
-  void serializeBool(Bos& b, bool v);
-
-  void serializeInt8(Bos& b, char v);
-  void serializeInt16(Bos& b, short v);
-  void serializeInt32(Bos& b, int v);
-  // void serializeInt64(Bos& b, long long v); // Not implemented
-  
-  void serializeUInt8(Bos& b, unsigned char v);
-  void serializeUInt16(Bos& b, unsigned short v);
-  void serializeUInt32(Bos& b, unsigned int v);
-  // void serializeUInt64(Bos& b, unsigned long long v); // Not implemented
-  
-  void serializeFloat(Bos& b, float v);
-  void serializeDouble(Bos& b, double v);
-
   void serializeString(Bos& b, const std::string& s);
   void serializeBytes(Bos& b, const void* bytes, unsigned int length);
   void serializeArray(Bos& b, const Value& v, const Value& bTemplate);

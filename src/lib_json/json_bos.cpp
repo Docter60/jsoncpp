@@ -88,22 +88,21 @@ void Bos::deserialize(Value& root) {
 }
 
 void Bos::deserializeArray(Value& root, unsigned int& i) {
-  unsigned int count = deserializeUVarInt(i);
-  for (unsigned int j = 0; j < count; ++j) {
+  size_t count = deserializeUVarInt(i);
+  for (size_t j = 0; j < count; ++j) {
     root.append(deserializeElement(i));
   }
 }
 
 void Bos::deserializeObject(Value& root, unsigned int& i) {
-  unsigned int count = deserializeUVarInt(i);
-  for (unsigned int j = 0; j < count; ++j) {
+  size_t count = deserializeUVarInt(i);
+  for (size_t j = 0; j < count; ++j) {
     std::string keyName = deserializeRawString(i);
-    printf("Object key: %s\n", keyName.data());
     root[keyName] = deserializeElement(i);
   }
 }
 
-unsigned int Bos::deserializeUVarInt(unsigned int& i) {
+size_t Bos::deserializeUVarInt(unsigned int& i) {
   const char& b = bytes[i];
   ++i;
   if (b < 0xFD) {
@@ -124,7 +123,7 @@ unsigned int Bos::deserializeUVarInt(unsigned int& i) {
 }
 
 std::string Bos::deserializeRawString(unsigned int& i) {
-  unsigned int count = deserializeUVarInt(i);
+  unsigned int count = (unsigned int)deserializeUVarInt(i);
   unsigned int temp = i;
   i += count;
   return std::string((const char*)&bytes[temp], count);
@@ -132,8 +131,6 @@ std::string Bos::deserializeRawString(unsigned int& i) {
 
 Value Bos::deserializeElement(unsigned int& i) {
   BosDataType t = (BosDataType)bytes[i];
-  printf("Position: %u    ", i);
-  printf("0x%02x\n", bytes[i]);
   ++i;
   int temp = i;
   switch (t) {

@@ -1073,59 +1073,6 @@ Value& Value::resolveReference(char const* key, char const* end) {
   return value;
 }
 
-void Value::serializeNull(Bos& b) { b.append(BosDataType::NULL_T); }
-
-void Value::serializeBool(Bos& b, bool v) {
-  b.append(BosDataType::BOOL_T);
-  b.append(v);
-}
-
-void Value::serializeInt8(Bos& b, char v) {
-  b.append(BosDataType::INT8_T);
-  b.append(v);
-}
-
-void Value::serializeInt16(Bos& b, short v) {
-  b.append(BosDataType::INT16_T);
-  void* uc = static_cast<void*>(&v);
-  b.append(uc, sizeof(int16_t));
-}
-
-void Value::serializeInt32(Bos& b, int v) {
-  b.append(BosDataType::INT32_T);
-  void* uc = static_cast<void*>(&v);
-  b.append(uc, sizeof(int32_t));
-}
-
-void Value::serializeUInt8(Bos& b, unsigned char v) {
-  b.append(BosDataType::UINT8_T);
-  b.append(v);
-}
-
-void Value::serializeUInt16(Bos& b, unsigned short v) {
-  b.append(BosDataType::UINT16_T);
-  void* uc = static_cast<void*>(&v);
-  b.append(uc, sizeof(uint16_t));
-}
-
-void Value::serializeUInt32(Bos& b, unsigned int v) {
-  b.append(BosDataType::UINT32_T);
-  void* uc = static_cast<void*>(&v);
-  b.append(uc, sizeof(uint32_t));
-}
-
-void Value::serializeFloat(Bos& b, float v) {
-  //b.append(BosDataType::FLOAT_T);
-  void* uc = static_cast<void*>(&v);
-  b.append(uc, sizeof(float));
-}
-
-void Value::serializeDouble(Bos& b, double v) {
-  //b.append(BosDataType::DOUBLE_T);
-  void* uc = static_cast<void*>(&v);
-  b.append(uc, sizeof(double));
-}
-
 void Value::serializeString(Bos& b, const std::string& s) {
   b.append(BosDataType::STRING_T);
   size_t l = s.length();
@@ -1169,7 +1116,7 @@ void Value::serializeArray(Bos& b, const Value& v,
     case ValueType::intValue: {
       BosDataType bdt = (BosDataType)tIt->second.asInt();
       b.append(&bdt, sizeof(unsigned char));
-      int32_t i = av.asInt();
+      int64_t i = av.asInt64();
       const void* vh = &i;
       switch (bdt) {
       case BosDataType::INT8_T:
@@ -1191,7 +1138,7 @@ void Value::serializeArray(Bos& b, const Value& v,
     case ValueType::uintValue: {
       BosDataType bdt = (BosDataType)tIt->second.asInt();
       b.append(&bdt, sizeof(unsigned char));
-      uint32_t ui = av.asUInt();
+      uint64_t ui = av.asUInt64();
       const void* vh = &ui;
       switch (bdt) {
       case BosDataType::UINT8_T:
@@ -1214,11 +1161,17 @@ void Value::serializeArray(Bos& b, const Value& v,
       BosDataType bdt = (BosDataType)tIt->second.asInt();
       b.append(&bdt, sizeof(unsigned char));
       switch (bdt) {
-      case BosDataType::FLOAT_T:
-        serializeFloat(b, av.asFloat());
+      case BosDataType::FLOAT_T: {
+        float f = av.asFloat();
+        void* uc = static_cast<void*>(&f);
+        b.append(uc, sizeof(float));
+      }
         break;
-      case BosDataType::DOUBLE_T:
-        serializeDouble(b, av.asDouble());
+      case BosDataType::DOUBLE_T: {
+        double f = av.asDouble();
+        void* uc = static_cast<void*>(&f);
+        b.append(uc, sizeof(double));
+      }
       default:
         break;
       }
@@ -1269,7 +1222,7 @@ void Value::serializeObject(Bos& b, const Value& v,
     case ValueType::intValue: {
       BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
       b.append(&bdt, sizeof(unsigned char));
-      int32_t i = ev.asInt();
+      int64_t i = ev.asInt64();
       const void* vh = &i;
       switch (bdt) {
       case BosDataType::INT8_T:
@@ -1292,7 +1245,7 @@ void Value::serializeObject(Bos& b, const Value& v,
     case ValueType::uintValue: {
       BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
       b.append(&bdt, sizeof(unsigned char));
-      uint32_t ui = ev.asUInt();
+      uint64_t ui = ev.asUInt64();
       const void* vh = &ui;
       switch (bdt) {
       case BosDataType::UINT8_T:
@@ -1316,11 +1269,17 @@ void Value::serializeObject(Bos& b, const Value& v,
       BosDataType bdt = (BosDataType)bTemplate[nameData].asInt();
       b.append(&bdt, sizeof(unsigned char));
       switch (bdt) {
-      case BosDataType::FLOAT_T:
-        serializeFloat(b, ev.asFloat());
+      case BosDataType::FLOAT_T: {
+        float f = ev.asFloat();
+        void* uc = static_cast<void*>(&f);
+        b.append(uc, sizeof(float));
+      }
         break;
-      case BosDataType::DOUBLE_T:
-        serializeDouble(b, ev.asDouble());
+      case BosDataType::DOUBLE_T: {
+        double f = ev.asDouble();
+        void* uc = static_cast<void*>(&f);
+        b.append(uc, sizeof(double));
+      }
       default:
         break;
       }
