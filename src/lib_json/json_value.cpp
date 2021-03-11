@@ -1074,21 +1074,10 @@ Value& Value::resolveReference(char const* key, char const* end) {
 }
 
 void Value::serializeString(Bos& b, const std::string& s) {
-  b.append(BosDataType::STRING_T);
   size_t l = s.length();
   serializeUVarInt(b, l);
   for (size_t i = 0; i < l; ++i) {
     b.append(s[i]);
-  }
-}
-
-void Value::serializeBytes(Bos& b, const void* bytes,
-                           unsigned int length) {
-  b.append(BosDataType::BYTES_T);
-  const char* c = (const char*)bytes;
-  serializeUVarInt(b, length);
-  for (unsigned int i = 0; i < length; ++i) {
-    b.append(c[i]);
   }
 }
 
@@ -1179,11 +1168,14 @@ void Value::serializeArray(Bos& b, const Value& v,
       break;
     case ValueType::stringValue:
       if (tIt->second.isNull()) {
+        b.append(BosDataType::STRING_T);
         serializeString(b, av.asString());
       } else if (tIt->second.asInt() == (int)BosDataType::STRING_T) {
+        b.append(BosDataType::STRING_T);
         serializeString(b, av.asString());
       } else if (tIt->second.asInt() == (int)BosDataType::BYTES_T) {
-        serializeBytes(b, av.asCString(), sizeof(av.asCString()));
+        b.append(BosDataType::BYTES_T);
+        serializeString(b, av.asString());
       }
       break;
     case ValueType::arrayValue:
@@ -1287,11 +1279,14 @@ void Value::serializeObject(Bos& b, const Value& v,
       break;
     case ValueType::stringValue:
       if (bTemplate[nameData].isNull()) {
+        b.append(BosDataType::STRING_T);
         serializeString(b, ev.asString());
       } else if (bTemplate[nameData].asInt() == (int)BosDataType::STRING_T) {
+        b.append(BosDataType::STRING_T);
         serializeString(b, ev.asString());
       } else if (bTemplate[nameData].asInt() == (int)BosDataType::BYTES_T) {
-        serializeBytes(b, ev.asCString(), sizeof(ev.asCString()));
+        b.append(BosDataType::BYTES_T);
+        serializeString(b, ev.asString());
       }
       break;
     case ValueType::arrayValue:

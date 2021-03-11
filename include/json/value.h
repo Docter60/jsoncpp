@@ -609,7 +609,6 @@ private:
   Value& resolveReference(const char* key, const char* end);
 
   void serializeString(Bos& b, const std::string& s);
-  void serializeBytes(Bos& b, const void* bytes, unsigned int length);
   void serializeArray(Bos& b, const Value& v, const Value& bTemplate);
   void serializeObject(Bos& b, const Value& v, const Value& bTemplate);
   void serializeUVarInt(Bos& b, size_t i);

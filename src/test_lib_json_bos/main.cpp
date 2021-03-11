@@ -30,7 +30,7 @@ int main() {
   value["float"] = M_PI;
   value["double"] = 2.0 * M_PI;
   value["string"] = "Hello BOS!";
-  value["bytes"] = "abcdefg";
+  value["bytes"] = "\u0001\u0002\u0003\u0001\u0002\u0003";
   value["array"].append("This is a string in an array");
   value["array"].append(17);
   value["array"].append(Json::Value());
