@@ -79,7 +79,7 @@ void Bos::clear() {
   setLengthBytes();
 }
 
-void Bos::deserialize(Value& root) {
+void Bos::deserialize(Value& root) const {
   if (bytes[4] != (unsigned char)BosDataType::OBJ_T)
     return;
   root.clear();
@@ -87,14 +87,14 @@ void Bos::deserialize(Value& root) {
   deserializeObject(root, i);
 }
 
-void Bos::deserializeArray(Value& root, unsigned int& i) {
+void Bos::deserializeArray(Value& root, unsigned int& i) const {
   size_t count = deserializeUVarInt(i);
   for (size_t j = 0; j < count; ++j) {
     root.append(deserializeElement(i));
   }
 }
 
-void Bos::deserializeObject(Value& root, unsigned int& i) {
+void Bos::deserializeObject(Value& root, unsigned int& i) const {
   size_t count = deserializeUVarInt(i);
   for (size_t j = 0; j < count; ++j) {
     std::string keyName = deserializeRawString(i);
@@ -102,7 +102,7 @@ void Bos::deserializeObject(Value& root, unsigned int& i) {
   }
 }
 
-size_t Bos::deserializeUVarInt(unsigned int& i) {
+size_t Bos::deserializeUVarInt(unsigned int& i) const {
   const char& b = bytes[i];
   ++i;
   if (b < 0xFD) {
@@ -122,14 +122,14 @@ size_t Bos::deserializeUVarInt(unsigned int& i) {
   }
 }
 
-std::string Bos::deserializeRawString(unsigned int& i) {
+std::string Bos::deserializeRawString(unsigned int& i) const {
   unsigned int count = (unsigned int)deserializeUVarInt(i);
   unsigned int temp = i;
   i += count;
   return std::string((const char*)&bytes[temp], count);
 }
 
-Value Bos::deserializeElement(unsigned int& i) {
+Value Bos::deserializeElement(unsigned int& i) const {
   BosDataType t = (BosDataType)bytes[i];
   ++i;
   int temp = i;

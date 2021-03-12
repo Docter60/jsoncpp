@@ -42,14 +42,14 @@ public:
 
   void clear();
 
-  void deserialize(Value& root);
+  void deserialize(Value& root) const;
 
 private:
-  void deserializeArray(Value& root, unsigned int& i);
-  void deserializeObject(Value& root, unsigned int& i);
-  size_t deserializeUVarInt(unsigned int& i);
-  std::string deserializeRawString(unsigned int& i);
-  Value deserializeElement(unsigned int& i);
+  void deserializeArray(Value& root, unsigned int& i) const;
+  void deserializeObject(Value& root, unsigned int& i) const;
+  size_t deserializeUVarInt(unsigned int& i) const;
+  std::string deserializeRawString(unsigned int& i) const;
+  Value deserializeElement(unsigned int& i) const;
   void setLengthBytes();
   void resize();
   void resizeToFit(uint32_t additionalBytes);

@@ -1073,7 +1073,7 @@ Value& Value::resolveReference(char const* key, char const* end) {
   return value;
 }
 
-void Value::serializeString(Bos& b, const std::string& s) {
+void Value::serializeString(Bos& b, const std::string& s) const {
   size_t l = s.length();
   serializeUVarInt(b, l);
   for (size_t i = 0; i < l; ++i) {
@@ -1082,7 +1082,7 @@ void Value::serializeString(Bos& b, const std::string& s) {
 }
 
 void Value::serializeArray(Bos& b, const Value& v,
-                           const Value& bTemplate) {
+                           const Value& bTemplate) const {
   b.append(BosDataType::ARRAY_T);
   serializeUVarInt(b, v.size());
   const ObjectValues& vmap = *(v.value_.map_);
@@ -1191,7 +1191,7 @@ void Value::serializeArray(Bos& b, const Value& v,
 }
 
 void Value::serializeObject(Bos& b, const Value& v,
-                            const Value& bTemplate) {
+                            const Value& bTemplate) const {
   b.append(BosDataType::OBJ_T);
   serializeUVarInt(b, v.size());
   for (const auto& e : *(v.value_.map_)) {
@@ -1301,7 +1301,7 @@ void Value::serializeObject(Bos& b, const Value& v,
   }
 }
 
-void Value::serializeUVarInt(Bos& b, size_t i) {
+void Value::serializeUVarInt(Bos& b, size_t i) const {
   const void* uc = &i;
   if (i < 0xFDu) {
     b.append(uc, sizeof(uint8_t));
@@ -1680,7 +1680,7 @@ ptrdiff_t Value::getOffsetStart() const { return start_; }
 
 ptrdiff_t Value::getOffsetLimit() const { return limit_; }
 
-void Value::serialize(Bos& b, const Value& bTemplate) {
+void Value::serialize(Bos& b, const Value& bTemplate) const {
   if (type() != ValueType::objectValue)
     return;
   b.clear();

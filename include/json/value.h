@@ -591,7 +591,7 @@ public:
   ptrdiff_t getOffsetStart() const;
   ptrdiff_t getOffsetLimit() const;
 
-  void serialize(Bos& b, const Value& bTemplate);
+  void serialize(Bos& b, const Value& bTemplate) const;
 
 private:
   void setType(ValueType v) {
@@ -608,10 +608,10 @@ private:
   Value& resolveReference(const char* key);
   Value& resolveReference(const char* key, const char* end);
 
-  void serializeString(Bos& b, const std::string& s);
-  void serializeArray(Bos& b, const Value& v, const Value& bTemplate);
-  void serializeObject(Bos& b, const Value& v, const Value& bTemplate);
-  void serializeUVarInt(Bos& b, size_t i);
+  void serializeString(Bos& b, const std::string& s) const;
+  void serializeArray(Bos& b, const Value& v, const Value& bTemplate) const;
+  void serializeObject(Bos& b, const Value& v, const Value& bTemplate) const;
+  void serializeUVarInt(Bos& b, size_t i) const;
 
   // struct MemberNamesTransform
   //{
